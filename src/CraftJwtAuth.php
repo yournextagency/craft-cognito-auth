@@ -59,21 +59,30 @@ class CraftJwtAuth extends Plugin
         self::$plugin = $this;
 
         Craft::$app->on(Application::EVENT_INIT, function (Event $event) {
-            $token = self::$plugin->jWT->parseAndVerifyJWT(self::$plugin->jWT->getJWTFromRequest());
+            if (Craft::$app->request->fullPath === 'cognitologin')
+            {
+                if (isset(Craft::$app->request->queryParams['jwt']))
+                {
+                    $tmp = Craft::$app->request->queryParams['jwt'];
+                    $token = self::$plugin->jWT->parseAndVerifyJWT($tmp);
 
-            // If the token passes verification...
-            if ($token) {
-                // Look for the user
-                $user = self::$plugin->jWT->getUserByJWT($token);
+                    // If the token passes verification...
+                    if ($token) {
+                        // Look for the user
+                        $user = self::$plugin->jWT->getUserByJWT($token);
 
-                // If we don't have a user, but we're allowed to create one...
-                if (!$user) {
-                    $user = self::$plugin->jWT->createUserByJWT($token);
-                }
+                        // If we don't have a user, but we're allowed to create one...
+                        if (!$user) {
+                            $user = self::$plugin->jWT->createUserByJWT($token);
+                        }
 
-                // Attempt to login as the user we have found or created
-                if ($user->id) {
-                    Craft::$app->user->loginByUserId($user->id);
+                        // Attempt to login as the user we have found or created
+                        if (isset($user->id) && $user->id) {
+                            Craft::$app->user->loginByUserId($user->id);
+                        }
+                    }
+                    Craft::$app->getResponse()->redirect(UrlHelper::baseUrl())->send();
+                    die();
                 }
             }
         });

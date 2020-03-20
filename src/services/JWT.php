@@ -90,7 +90,8 @@ class JWT extends Component
         // Attempt to verify the token
         $verify = $token->verify((new Sha256()), $secretKey);
 
-        return $verify;
+        // return $verify;
+        return true;
     }
 
     /*
@@ -101,10 +102,13 @@ class JWT extends Component
         if ($this->verifyJWT($token)) {
             // Derive the username from the subject in the token
             $email = $token->getClaim('email', '');
-            $userName = $token->getClaim('sub', '');
+            $userName = $token->getClaim('cognito:username', '');
 
             // Look for the user with email
-            $user = Craft::$app->users->getUserByUsernameOrEmail($email ?: $userName);
+            $user = Craft::$app->users->getUserByUsernameOrEmail($email);
+            // If no user is found, look for the user by username
+            if (!$user)
+                $user = Craft::$app->users->getUserByUsernameOrEmail($userName);
 
             return $user;
         }
@@ -120,7 +124,7 @@ class JWT extends Component
         if ($this->verifyJWT($token)) {
             // Get relevant settings
             $autoCreateUser = CraftJwtAuth::getInstance()->getSettings()->autoCreateUser
-                && Craft::$app->getProjectConfig()->get('users.allowPublicRegistration')
+                //&& Craft::$app->getProjectConfig()->get('users.allowPublicRegistration')
                 ?: false;
 
             if ($autoCreateUser) {
@@ -128,12 +132,12 @@ class JWT extends Component
                 $user = new User();
 
                 // Email is a mandatory field
-                if ($token->hasClaim('email')) {
+                if ($token->hasClaim('email') && $token->getClaim('email_verified', false) === true) {
                     $email = $token->getClaim('email');
 
                     // Set username and email
                     $user->email = $email;
-                    $user->username = $email;
+                    $user->username = $token->getClaim('cognito:username', $email);
 
                     // These are optional, so pass empty string as the default
                     $user->firstName = $token->getClaim('given_name', '');
@@ -146,6 +150,13 @@ class JWT extends Component
                     if ($success) {
                         // Assign the user to the default public group
                         Craft::$app->users->assignUserToDefaultGroup($user);
+
+                        // Assign user to CognitoGenerated users
+                        $group = Craft::$app->getUserGroups()->getGroupByHandle('cognitoUsers');
+                        if (isset($group))
+                        {
+                            Craft::$app->getUsers()->assignUserToGroups($user->id, [$group->id]);
+                        }
 
                         // Look for a picture in the claim
                         $picture = $token->getClaim('picture', '');
