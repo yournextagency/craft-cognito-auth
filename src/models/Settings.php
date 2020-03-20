@@ -23,11 +23,22 @@ class Settings extends Model
     // Public Properties
     // =========================================================================
 
-    /**
-     * @var string
-     */
-    public $secretKey = '';
-    public $autoCreateUser = '';
+    /** @var boolean */
+    public $autoCreateUser = false;
+    /** @var boolean */
+    public $autoCreateUserWhenPublicRegistrationDisabled = false;
+    /** @var integer */
+    public $newUserGroup = 0;
+    /** @var boolean */
+    public $addLoginLink = false;
+    /** @var string */
+    public $customizeLoginLinkText = '';
+    /** @var string */
+    public $userPoolRegion = '';
+    /** @var string */
+    public $userPoolAppID = '';
+    /** @var string */
+    public $userPoolID = '';
 
     // Public Methods
     // =========================================================================
@@ -38,8 +49,14 @@ class Settings extends Model
     public function rules()
     {
         return [
-            ['secretKey', 'string'],
             ['autoCreateUser', 'boolean'],
+            ['autoCreateUserWhenPublicRegistrationDisabled', 'boolean'],
+            ['newUserGroup', 'integer'],
+            ['addLoginLink', 'boolean'],
+            ['customizeLoginLinkText', 'string'],
+            ['userPoolRegion', 'string'],
+            ['userPoolAppID', 'string'],
+            ['userPoolID', 'string']
         ];
     }
 }

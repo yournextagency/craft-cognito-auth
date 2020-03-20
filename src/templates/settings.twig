@@ -15,18 +15,80 @@
 
 {% import "_includes/forms" as forms %}
 
-{{ forms.autosuggestField({
-    label: 'Secret Key',
-    instructions: 'Enter your secret key for JWT token signing and verifying',
-    id: 'secretKey',
-    name: 'secretKey',
-    value: settings['secretKey'] is defined? settings['secretKey'] : ''})
-}}
+{{ forms.lightswitchField({
+    first: true,
+    label: 'Auto create users',
+    instructions: 'If enabled, will automatically create a public user when provided with a verified JWT',
+    name: 'autoCreateUser',
+    on: settings.autoCreateUser
+}) }}
+
 
 {{ forms.lightswitchField({
-    label: 'Auto create user',
-    instructions: 'If enabled, will automatically create a public user when provided with a verified JWT.',
-    id: 'autoCreateUser',
-    name: 'autoCreateUser',
-    on: settings['autoCreateUser'] is defined? settings['autoCreateUser'] : false})
-}}
+    label: 'Auto create users when Public Registration is disabled',
+    instructions: 'Allow creating users even when Public Registration is disabled in craft\'s settings',
+    name: 'autoCreateUserWhenPublicRegistrationDisabled',
+    on: settings.autoCreateUserWhenPublicRegistrationDisabled
+}) }}
+
+
+{% set groups = [{ label: "None", value: '' }] %}
+{% for group in craft.app.userGroups.getAllGroups() %}
+    {% set groups = groups|merge([{ label: group.name, value: group.id }]) %}
+{% endfor %}
+
+{{ forms.selectField({
+    label: 'Default User Group',
+    instructions: 'Choose a user group that users will be added to when created from Cognito',
+    name: 'newUserGroup',
+    options: groups,
+    value: settings.newUserGroup,
+    errors: settings.getErrors('newUserGroup')
+}) }}
+
+
+{{ forms.lightswitchField({
+    label: 'Enable CP Login Link',
+    instructions: 'Toggles the visibility of the Login with Cognito link on the Control Panel\'s login screen',
+    name: 'addLoginLink',
+    on: settings.addLoginLink
+}) }}
+
+
+{{ forms.autosuggestField({
+    label: 'Customize Login Link text',
+    instructions: 'The text that the login link should show on the Control Panel\'s login screen',
+    name: 'customizeLoginLinkText',
+    value: settings.customizeLoginLinkText
+}) }}
+
+<br />
+<h1>AWS Settings</h1>
+
+{{ forms.autosuggestField({
+    label: 'User Pool Region',
+    instructions: 'The AWS Region where the User Pool is hosted',
+    name: 'userPoolRegion',
+    value: settings.userPoolRegion,
+}) }}
+
+{{ forms.autosuggestField({
+    label: 'App Client ID',
+    instructions: 'Used to generate a login link and to verify the JWK was created for the correct pool',
+    name: 'userPoolAppID',
+    value: settings.userPoolAppID
+}) }}
+
+{{ forms.autosuggestField({
+    label: 'User Pool ID',
+    instructions: 'Required to get the key Cognito used to sign the JWK',
+    name: 'userPoolID',
+    value: settings.userPoolID
+}) }}
+
+{{ forms.textField({
+    label: 'Redirect Target',
+    instructions: 'Add the below link as allowed target in your user pool settings:',
+    value: '$DEFAULT_SITE_URL/cognitoauth',
+    disabled: true
+}) }}

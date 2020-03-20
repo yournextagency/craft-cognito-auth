@@ -26,9 +26,27 @@
 return [
     // TODO: Make these actually do something...
 
-    // Your secrete ket used for signing generated and verifying incoming JWTs
-    "secretKey" => '',
-
-    // Whether to automatically create a user for verified JWTs that don't match an account
+    // If enabled, will automatically create a public user when provided with a verified JWT
     "autoCreateUser" => true,
+
+    // Allow creating users even when Public Registration is disabled in craft's settings
+    "autoCreateUserWhenPublicRegistrationDisabled" => false,
+
+    // Choose a user group that users will be added to when created from Cognito
+    "newUserGroup" => 0,
+
+    // Enable CP Login Link - Toggles the visibility of the Login with Cognito link on the Control Panel's login screen
+    "addLoginLink" => false,
+
+    // The text that the login link should show on the Control Panel's login screen
+    "customizeLoginLinkText" => '',
+
+    // The AWS Region where the User Pool is hosted
+    "userPoolRegion" => '',
+
+    // App Client ID - Used to generate a login link and to verify the JWK was created for the correct pool
+    "userPoolAppID" => '',
+
+    // Required to get the key Cognito used to sign the JWK
+    "userPoolID" => '',
 ];
