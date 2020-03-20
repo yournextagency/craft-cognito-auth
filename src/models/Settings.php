@@ -9,13 +9,13 @@
  * @copyright Copyright (c) 2019 Mike Pierce
  */
 
-namespace edenspiekermann\craftjwtauth\models;
+namespace structureit\craftcognitoauth\models;
 
 use craft\base\Model;
 
 /**
  * @author    Mike Pierce
- * @package   CraftJwtAuth
+ * @package   CraftCognitoAuth
  * @since     0.1.0
  */
 class Settings extends Model

@@ -11,9 +11,9 @@
 
 /**
  * @author    Mike Pierce
- * @package   CraftJwtAuth
+ * @package   CraftCognitoAuth
  * @since     0.1.0
  */
 return [
-    'Craft JWT Auth plugin loaded' => 'Craft JWT Auth plugin loaded',
+    'Craft Cognito Auth plugin loaded' => 'Craft Cognito Auth plugin loaded',
 ];

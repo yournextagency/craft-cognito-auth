@@ -9,13 +9,13 @@
  * @copyright Copyright (c) 2019 Mike Pierce
  */
 
-namespace edenspiekermann\craftjwtauth\controllers;
+namespace structureit\craftcognitoauth\controllers;
 
 use craft\web\Controller;
 
 /**
  * @author    Mike Pierce
- * @package   CraftJwtAuth
+ * @package   CraftCognitoAuth
  * @since     0.1.0
  */
 class JWTController extends Controller

@@ -9,21 +9,21 @@
  * @copyright Copyright (c) 2019 Mike Pierce
  */
 
-namespace edenspiekermann\craftjwtauth\services;
+namespace structureit\craftcognitoauth\services;
 
 use Craft;
 use craft\base\Component;
 use craft\elements\User;
 use craft\helpers\StringHelper;
 use craft\helpers\ArrayHelper;
-use edenspiekermann\craftjwtauth\CraftJwtAuth;
+use structureit\craftcognitoauth\CraftCognitoAuth;
 use Lcobucci\JWT\Parser;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Token;
 
 /**
  * @author    Mike Pierce
- * @package   CraftJwtAuth
+ * @package   CraftCognitoAuth
  * @since     0.1.0
  */
 class JWT extends Component
@@ -85,7 +85,7 @@ class JWT extends Component
     */
     public function verifyJWT(Token $token)
     {
-        $secretKey = CraftJwtAuth::getInstance()->getSettings()->secretKey;
+        $secretKey = CraftCognitoAuth::getInstance()->getSettings()->secretKey;
 
         // Attempt to verify the token
         $verify = $token->verify((new Sha256()), $secretKey);
@@ -123,7 +123,7 @@ class JWT extends Component
     {
         if ($this->verifyJWT($token)) {
             // Get relevant settings
-            $autoCreateUser = CraftJwtAuth::getInstance()->getSettings()->autoCreateUser
+            $autoCreateUser = CraftCognitoAuth::getInstance()->getSettings()->autoCreateUser
                 //&& Craft::$app->getProjectConfig()->get('users.allowPublicRegistration')
                 ?: false;
 

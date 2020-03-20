@@ -1,6 +1,6 @@
 {
-  "name": "edenspiekermann/craft-jwt-auth",
-  "description": "Enable authentication to Craft through the use of JSON Web Tokens (JWT)",
+  "name": "structureit/craft-cognito-auth",
+  "description": "Enable authentication to Craft using Amazon Cognito with JWTs",
   "type": "craft-plugin",
   "version": "0.2.0",
   "keywords": [
@@ -11,8 +11,8 @@
     "craft jwt"
   ],
   "support": {
-    "docs": "https://github.com/edenspiekermann/craft-jwt-auth",
-    "issues": "https://github.com/edenspiekermann/craft-jwt-auth/issues"
+    "docs": "https://github.com/Walkman100/craft-cognito-auth",
+    "issues": "https://github.com/Walkman100/craft-cognito-auth/issues"
   },
   "license": "MIT",
   "authors": [
@@ -23,6 +23,10 @@
     {
       "name": "Edenspiekermann",
       "homepage": "https://edenspiekermann.com"
+    },
+    {
+        "name": "StructureIt Devs",
+        "homepage": "https://github.com/StructureIt"
     }
   ],
   "require": {
@@ -31,18 +35,18 @@
   },
   "autoload": {
     "psr-4": {
-      "edenspiekermann\\craftjwtauth\\": "src/"
+      "structureit\\craftcognitoauth\\": "src/"
     }
   },
   "extra": {
-    "name": "Craft JWT Auth",
-    "handle": "craft-jwt-auth",
+    "name": "Craft Cognito Auth",
+    "handle": "craft-cognito-auth",
     "hasCpSettings": true,
     "hasCpSection": false,
-    "changelogUrl": "https://raw.githubusercontent.com/edenspiekermann/craft-jwt-auth/master/CHANGELOG.md",
+    "changelogUrl": "https://raw.githubusercontent.com/Walkman100/craft-cognito-auth/master/CHANGELOG.md",
     "components": {
-      "jWT": "edenspiekermann\\craftjwtauth\\services\\JWT"
+      "jWT": "structureit\\craftcognitoauth\\services\\JWT"
     },
-    "class": "edenspiekermann\\craftjwtauth\\CraftJwtAuth"
+    "class": "structureit\\craftcognitoauth\\CraftCognitoAuth"
   }
 }
