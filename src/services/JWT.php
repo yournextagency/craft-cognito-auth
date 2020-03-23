@@ -31,31 +31,25 @@ class JWT extends Component
     // Public Methods
     // =========================================================================
 
-    /*
-     * @return mixed
+    /**
+     * Gets the access token in the query parameters. Returns false if no token is found.
+     * @return string|false
      */
     public function getJWTFromRequest()
     {
-        // Look for an access token in the settings
-        $accessToken = Craft::$app->request->headers->get('authorization') ?: Craft::$app->request->headers->get('x-access-token');
-
-        // If "Bearer " is present, strip it to get the token.
-        if (StringHelper::startsWith($accessToken, 'Bearer ')) {
-            $accessToken = StringHelper::substr($accessToken, 7);
-        }
-
-        // If we find one, and it looks like a JWT...
-        if ($accessToken) {
-            return $accessToken;
-        }
-
-        return null;
+        if (isset(Craft::$app->request->queryParams['jwt']))
+            return Craft::$app->request->queryParams['jwt'];
+        else
+            return false;
     }
 
-    /*
-    * @return mixed
-    */
-    public function parseAndVerifyJWT($accessToken)
+    /**
+     * Parses and verifies the access token string
+     *
+     * @param string $accessToken
+     * @return Token|false
+     */
+    public function parseAndVerifyJWT(string $accessToken)
     {
         $token = $this->parseJWT($accessToken);
 
@@ -63,13 +57,16 @@ class JWT extends Component
             return $token;
         }
 
-        return null;
+        return false;
     }
 
-    /*
-    * @return mixed
-    */
-    public function parseJWT($accessToken)
+    /**
+     * Parses the access token string and returns a Token if it can be parsed
+     *
+     * @param string $accessToken
+     * @return Token|false
+     */
+    public function parseJWT(string $accessToken)
     {
         if (count(explode('.', $accessToken)) === 3) {
             $token = (new Parser())->parse((string) $accessToken);
@@ -77,30 +74,38 @@ class JWT extends Component
             return $token;
         }
 
-        return null;
+        return false;
     }
 
-    /*
-    * @return mixed
-    */
+    /**
+     * Verifies the access token
+     *
+     * @param Token $token
+     * @return boolean
+     */
     public function verifyJWT(Token $token)
     {
-        $secretKey = CraftCognitoAuth::getInstance()->getSettings()->secretKey;
+        if (!$token->hasClaim('email'))
+            return false;
+        // $secretKey = CraftCognitoAuth::getInstance()->getSettings()->secretKey;
 
         // Attempt to verify the token
-        $verify = $token->verify((new Sha256()), $secretKey);
+        // $verify = $token->verify((new Sha256()), $secretKey);
 
         // return $verify;
         return true;
     }
 
-    /*
-    * @return mixed
-    */
+    /**
+     * Gets the Craft user associated with the access token
+     *
+     * @param Token $token
+     * @return User|false
+     */
     public function getUserByJWT(Token $token)
     {
         if ($this->verifyJWT($token)) {
-            // Derive the username from the subject in the token
+            // Derive the username & email from the subject in the token
             $email = $token->getClaim('email', '');
             $userName = $token->getClaim('cognito:username', '');
 
@@ -110,88 +115,104 @@ class JWT extends Component
             if (!$user)
                 $user = Craft::$app->users->getUserByUsernameOrEmail($userName);
 
-            return $user;
+            if ($user)
+                return $user;
         }
 
-        return null;
+        return false;
     }
 
-    /*
-    * @return mixed
-    */
+    /**
+     * Checks all the settings to determine if a new user should be created
+     *
+     * @return boolean
+     */
+    public function shouldAutoCreateUser()
+    {
+        if (CraftCognitoAuth::getInstance()->getSettings()->autoCreateUser) {
+            if (Craft::$app->getProjectConfig()->get('users.allowPublicRegistration')) {
+                return true;
+            } else {
+                return CraftCognitoAuth::getInstance()->getSettings()->autoCreateUserWhenPublicRegistrationDisabled;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Creates a Craft user according to the provided JWT. Returns false if creating user failed
+     *
+     * @param Token $token
+     * @return User|false
+     */
     public function createUserByJWT(Token $token)
     {
-        if ($this->verifyJWT($token)) {
-            // Get relevant settings
-            $autoCreateUser = CraftCognitoAuth::getInstance()->getSettings()->autoCreateUser
-                //&& Craft::$app->getProjectConfig()->get('users.allowPublicRegistration')
-                ?: false;
+        // Create a new user and populate with claims
+        $user = new User();
 
-            if ($autoCreateUser) {
-                // Create a new user and populate with claims
-                $user = new User();
+        // Get email - verifyJWT() makes sure this has an email claim
+        $email = $token->getClaim('email');
+        // just in case:
+        if (!$email)
+            return false;
 
-                // Email is a mandatory field
-                if ($token->hasClaim('email') && $token->getClaim('email_verified', false) === true) {
-                    $email = $token->getClaim('email');
+        // Set username and email
+        $user->email = $email;
+        $user->username = $token->getClaim('cognito:username', $email);
 
-                    // Set username and email
-                    $user->email = $email;
-                    $user->username = $token->getClaim('cognito:username', $email);
+        // These are optional, so pass empty string as the default
+        $user->firstName = $token->getClaim('given_name', '');
+        $user->lastName = $token->getClaim('family_name', '');
 
-                    // These are optional, so pass empty string as the default
-                    $user->firstName = $token->getClaim('given_name', '');
-                    $user->lastName = $token->getClaim('family_name', '');
+        // Attempt to save the user
+        $success = Craft::$app->getElements()->saveElement($user);
 
-                    // Attempt to save the user
-                    $success = Craft::$app->getElements()->saveElement($user);
+        // If user saved ok...
+        if ($success && $user->id) {
+            // Assign the user to the default public group
+            Craft::$app->getUsers()->assignUserToDefaultGroup($user);
 
-                    // If user saved ok...
-                    if ($success) {
-                        // Assign the user to the default public group
-                        Craft::$app->users->assignUserToDefaultGroup($user);
-
-                        // Assign user to CognitoGenerated users
-                        $group = Craft::$app->getUserGroups()->getGroupByHandle('cognitoUsers');
-                        if (isset($group))
-                        {
-                            Craft::$app->getUsers()->assignUserToGroups($user->id, [$group->id]);
-                        }
-
-                        // Look for a picture in the claim
-                        $picture = $token->getClaim('picture', '');
-                        if ($picture) {
-                            // Create a guzzel client
-                            $guzzle = Craft::createGuzzleClient();
-
-                            // Attempt to fetch the image
-                            $imageUpload = $guzzle->get($picture);
-
-                            // Derive the file extension from the content type
-                            $ext = self::$plugin->jWT->mime2ext($imageUpload->getHeader('Content-Type'));
-
-                            // Make a filename from the username, and add some randomness
-                            $fileName = $user->username . StringHelper::randomString() . '.' . $ext;
-                            $tempFile = Craft::$app->path->getTempAssetUploadsPath() . '/' . $fileName;
-
-                            // Fetch it again, this time saving it to a temp file
-                            $imageUpload = $guzzle->get($picture, ['save_to' => $tempFile]);
-
-                            // Save the tempfile to the user’s account as profile image
-                            Craft::$app->getUsers()->saveUserPhoto($tempFile, $user, $fileName);
-                        }
-
-                        return $user;
-                    }
-                }
+            // Assign user to group selected in settings
+            $groupid = CraftCognitoAuth::getInstance()->getSettings()->newUserGroup;
+            if (isset($groupid) && $groupid) {
+                Craft::$app->getUsers()->assignUserToGroups($user->id, [$groupid]);
             }
-        }
 
-        return null;
+            // Look for a picture in the claim
+            $picture = $token->hasClaim('picture') ? $token->getClaim('picture') : false;
+            if ($picture) {
+                // Create a guzzel client
+                $guzzle = Craft::createGuzzleClient();
+
+                // Attempt to fetch the image
+                $imageUpload = $guzzle->get($picture);
+
+                // Derive the file extension from the content type
+                $ext = $this->mime2ext($imageUpload->getHeader('Content-Type'));
+
+                // Make a filename from the username, and add some randomness
+                $fileName = $user->username . StringHelper::randomString() . '.' . $ext;
+                $tempFile = Craft::$app->path->getTempAssetUploadsPath() . '/' . $fileName;
+
+                // Fetch it again, this time saving it to a temp file
+                $imageUpload = $guzzle->get($picture, ['save_to' => $tempFile]);
+
+                // Save the tempfile to the user’s account as profile image
+                Craft::$app->getUsers()->saveUserPhoto($tempFile, $user, $fileName);
+            }
+
+            return $user;
+        } else {
+            return false;
+        }
     }
 
-    /*
-     * @return mixed
+    /**
+     * Converts a mime string to an extension string. Returns false if no mimetype found
+     *
+     * @param string|array $mime
+     * @return string|false
      */
     public function mime2ext($mime)
     {

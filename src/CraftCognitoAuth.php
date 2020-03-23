@@ -61,9 +61,8 @@ class CraftCognitoAuth extends Plugin
         Craft::$app->on(Application::EVENT_INIT, function (Event $event) {
             if (Craft::$app->request->fullPath === 'cognitologin')
             {
-                if (isset(Craft::$app->request->queryParams['jwt']))
+                if (($tmp = self::$plugin->jWT->getJWTFromRequest()))
                 {
-                    $tmp = Craft::$app->request->queryParams['jwt'];
                     $token = self::$plugin->jWT->parseAndVerifyJWT($tmp);
 
                     // If the token passes verification...
@@ -72,7 +71,10 @@ class CraftCognitoAuth extends Plugin
                         $user = self::$plugin->jWT->getUserByJWT($token);
 
                         // If we don't have a user, but we're allowed to create one...
-                        if (!$user) {
+                        if (!$user && !self::$plugin->jWT->shouldAutoCreateUser()) {
+                            print('No craft user found, and autocreate disabled!');
+                            die();
+                        } elseif (!$user) {
                             $user = self::$plugin->jWT->createUserByJWT($token);
                         }
 
