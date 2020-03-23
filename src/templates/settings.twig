@@ -26,7 +26,7 @@
 
 {{ forms.lightswitchField({
     label: 'Auto create users when Public Registration is disabled',
-    instructions: 'Allow creating users even when Public Registration is disabled in craft\'s settings',
+    instructions: 'Allow creating users even when Public Registration is disabled in <a href="' ~ cpUrl('settings/users/settings') ~ '">Craft\'s settings</a>',
     name: 'autoCreateUserWhenPublicRegistrationDisabled',
     on: settings.autoCreateUserWhenPublicRegistrationDisabled
 }) }}

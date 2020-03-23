@@ -85,12 +85,25 @@ class JWT extends Component
      */
     public function verifyJWT(Token $token)
     {
-        if (!$token->hasClaim('email'))
+        // check correct claims
+        if (!$token->hasClaim('email') || !$token->getClaim('email_verified'))
             return false;
-        // $secretKey = CraftCognitoAuth::getInstance()->getSettings()->secretKey;
+        $expectedAudience = CraftCognitoAuth::getInstance()->getSettings()->userPoolAppID;
+        if (!$token->hasClaim('aud') || $token->getClaim('aud') !== $expectedAudience)
+            return false;
+        if (!$token->hasClaim('token_use') || $token->getClaim('token_use') !== 'id')
+            return false;
+        $expectedIssuer = 'https://cognito-idp.' . CraftCognitoAuth::getInstance()->getSettings()->userPoolRegion;
+        $expectedIssuer .= '.amazonaws.com/' . CraftCognitoAuth::getInstance()->getSettings()->userPoolID;
+        if (!$token->hasClaim('iss') || $token->getClaim('iss') !== $expectedIssuer)
+            return false;
 
-        // Attempt to verify the token
-        // $verify = $token->verify((new Sha256()), $secretKey);
+
+        // verify signature
+            // $secretKey = CraftCognitoAuth::getInstance()->getSettings()->secretKey;
+
+            // Attempt to verify the token
+            // $verify = $token->verify((new Sha256()), $secretKey);
 
         // return $verify;
         return true;
