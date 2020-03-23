@@ -45,7 +45,8 @@
     "hasCpSection": false,
     "changelogUrl": "https://raw.githubusercontent.com/Walkman100/craft-cognito-auth/master/CHANGELOG.md",
     "components": {
-      "jWT": "structureit\\craftcognitoauth\\services\\JWT"
+      "jWT": "structureit\\craftcognitoauth\\services\\JWT",
+      "CognitoJWK": "structureit\\craftcognitoauth\\services\\CognitoJWK"
     },
     "class": "structureit\\craftcognitoauth\\CraftCognitoAuth"
   }

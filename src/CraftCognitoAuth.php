@@ -12,6 +12,7 @@
 namespace structureit\craftcognitoauth;
 
 use structureit\craftcognitoauth\services\JWT as JWTService;
+use structureit\craftcognitoauth\services\CognitoJWK as CognitoJWKService;
 use structureit\craftcognitoauth\models\Settings;
 
 use Craft;
@@ -28,6 +29,7 @@ use yii\base\Event;
  * @since     0.1.0
  *
  * @property  JWTService $jWT
+ * @property  CognitoJWKService $CognitoJWK
  */
 class CraftCognitoAuth extends Plugin
 {

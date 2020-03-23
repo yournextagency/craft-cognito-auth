@@ -98,6 +98,12 @@ class JWT extends Component
         if (!$token->hasClaim('iss') || $token->getClaim('iss') !== $expectedIssuer)
             return false;
 
+        $JWKS = CraftCognitoAuth::$plugin->CognitoJWK->getCognitoJWKS();
+        if (!$JWKS)
+            return false;
+        $JWK = CraftCognitoAuth::$plugin->CognitoJWK->pickJWK($JWKS, $token->getHeader('kid', ''));
+        if (!$JWK)
+            return false;
 
         // verify signature
             // $secretKey = CraftCognitoAuth::getInstance()->getSettings()->secretKey;
