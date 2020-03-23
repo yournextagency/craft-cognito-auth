@@ -59,31 +59,64 @@ class CraftCognitoAuth extends Plugin
         self::$plugin = $this;
 
         Craft::$app->on(Application::EVENT_INIT, function (Event $event) {
-            if (Craft::$app->request->fullPath === 'cognitologin')
+            if (Craft::$app->request->fullPath === 'cognitoauth')
             {
-                if (($tmp = self::$plugin->jWT->getJWTFromRequest()))
+                if (($jwt = self::$plugin->jWT->getJWTFromRequest()))
                 {
-                    $token = self::$plugin->jWT->parseAndVerifyJWT($tmp);
-
-                    // If the token passes verification...
-                    if ($token) {
+                    // If the token passes verification
+                    if (($token = self::$plugin->jWT->parseAndVerifyJWT($jwt))) {
                         // Look for the user
                         $user = self::$plugin->jWT->getUserByJWT($token);
 
-                        // If we don't have a user, but we're allowed to create one...
+                        // If we don't have a user, and we're NOT allowed to create on
                         if (!$user && !self::$plugin->jWT->shouldAutoCreateUser()) {
                             print('No craft user found, and autocreate disabled!');
                             die();
-                        } elseif (!$user) {
+                        } elseif (!$user) { // If we don't have a user, but we ARE allowed to create one
                             $user = self::$plugin->jWT->createUserByJWT($token);
                         }
 
                         // Attempt to login as the user we have found or created
                         if (isset($user->id) && $user->id) {
                             Craft::$app->user->loginByUserId($user->id);
+                            // redirect back to the homepage
+                            Craft::$app->getResponse()->redirect(UrlHelper::baseUrl())->send();
+                            die();
+                        } else {
+                            print('Unknown error getting/creating user!');
+                            die();
                         }
+                    } else {
+                        print('Invalid token!');
+                        die();
                     }
-                    Craft::$app->getResponse()->redirect(UrlHelper::baseUrl())->send();
+                } else {
+                    // No jwt in QueryParams, try using javascript to extract from SearchParams
+                    print('
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <script type="text/javascript">
+            var params = window.location.hash.substr(1);
+            var searchParams = new URLSearchParams(params);
+            var id_token = searchParams.get("id_token");
+            if (id_token !== null) {
+                window.location.replace(window.location.pathname + "?jwt=" + id_token);
+                document.write("Redirecting...");
+            } else {
+                document.write("No Token Found!");
+            }
+        </script>
+    </head>
+    <body style="font-family: Verdana, Geneva, Tahoma, sans-serif;">
+        <noscript>
+            This page uses javascript to move the id_token to the query parameters. Either enable Javascript,
+            or manually edit the "#id_token=" part of the url to "?jwt=".
+        </noscript>
+    </body>
+</html>
+                    ');
                     die();
                 }
             }
