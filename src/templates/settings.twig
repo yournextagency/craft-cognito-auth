@@ -70,20 +70,23 @@
     instructions: 'The AWS Region where the User Pool is hosted',
     name: 'userPoolRegion',
     value: settings.userPoolRegion,
+    warning: 'Required'
 }) }}
 
 {{ forms.autosuggestField({
     label: 'App Client ID',
     instructions: 'Used to generate a login link and to verify the JWK was created for the correct pool',
     name: 'userPoolAppID',
-    value: settings.userPoolAppID
+    value: settings.userPoolAppID,
+    warning: 'Required'
 }) }}
 
 {{ forms.autosuggestField({
     label: 'User Pool ID',
     instructions: 'Required to get the key Cognito used to sign the JWK',
     name: 'userPoolID',
-    value: settings.userPoolID
+    value: settings.userPoolID,
+    warning: 'Required'
 }) }}
 
 {{ forms.textField({
