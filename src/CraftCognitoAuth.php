@@ -70,7 +70,7 @@ class CraftCognitoAuth extends Plugin
                         // Look for the user
                         $user = self::$plugin->jWT->getUserByJWT($token);
 
-                        // If we don't have a user, and we're NOT allowed to create on
+                        // If we don't have a user, and we're NOT allowed to create one
                         if (!$user && !self::$plugin->jWT->shouldAutoCreateUser()) {
                             print('No craft user found, and autocreate disabled!');
                             die();

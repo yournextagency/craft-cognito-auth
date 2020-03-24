@@ -85,6 +85,10 @@ class JWT extends Component
      */
     public function verifyJWT(Token $token)
     {
+        // do nothing if token has expired
+        if ($token->isExpired())
+            return false;
+
         // check correct claims
         if (!$token->hasClaim('email') || !$token->getClaim('email_verified'))
             return false;
