@@ -12,6 +12,7 @@
 namespace structureit\craftcognitoauth\controllers;
 
 use Craft;
+use craft\web\View;
 use craft\helpers\UrlHelper;
 use craft\web\Controller;
 use structureit\craftcognitoauth\CraftCognitoAuth;
@@ -52,7 +53,9 @@ class JWTController extends Controller
 
                 if (!$user && !CraftCognitoAuth::$plugin->jWT->shouldAutoCreateUser())
                 {   // If we don't have a user, and we're NOT allowed to create one
-                    return 'No craft user found, and autocreate disabled!';
+                    return $this->renderTemplate('error', [
+                            'message' => 'No Existing User Found! (And not allowed to create new users)'
+                        ], View::TEMPLATE_MODE_CP);
                 }
                 elseif (!$user)
                 {   // If we don't have a user, but we ARE allowed to create one
@@ -68,12 +71,16 @@ class JWTController extends Controller
                 }
                 else
                 {   // no user ID, something went wrong...
-                    return 'Unknown error getting/creating user!';
+                    return $this->renderTemplate('error', [
+                            'message' => 'Unknown Error Getting/Creating User!'
+                        ], View::TEMPLATE_MODE_CP);
                 }
             }
             else
             {   // parseToken or verifyToken failed
-                return 'Invalid token!';
+                return $this->renderTemplate('error', [
+                        'message' => 'Invalid Token!'
+                    ], View::TEMPLATE_MODE_CP);
             }
         }
         else
