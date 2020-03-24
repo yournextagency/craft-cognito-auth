@@ -18,7 +18,7 @@ use craft\helpers\StringHelper;
 use craft\helpers\ArrayHelper;
 use structureit\craftcognitoauth\CraftCognitoAuth;
 use Lcobucci\JWT\Parser;
-use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Lcobucci\JWT\Signer\Rsa\Sha256 as RsaSha256;
 use Lcobucci\JWT\Token;
 
 /**
@@ -98,21 +98,20 @@ class JWT extends Component
         if (!$token->hasClaim('iss') || $token->getClaim('iss') !== $expectedIssuer)
             return false;
 
+        // get JWKSet from Cognito
         $JWKS = CraftCognitoAuth::$plugin->CognitoJWK->getCognitoJWKS();
         if (!$JWKS)
             return false;
+        // Choose the correct one that matches the token's KeyID
         $JWK = CraftCognitoAuth::$plugin->CognitoJWK->pickJWK($JWKS, $token->getHeader('kid', ''));
         if (!$JWK)
             return false;
+        // Convert to PEM Certificate string
+        $secretKey = CraftCognitoAuth::$plugin->CognitoJWK->JWKtoKey($JWK);
 
-        // verify signature
-            // $secretKey = CraftCognitoAuth::getInstance()->getSettings()->secretKey;
-
-            // Attempt to verify the token
-            // $verify = $token->verify((new Sha256()), $secretKey);
-
-        // return $verify;
-        return true;
+        // Attempt to verify the token
+        $verify = $token->verify((new RsaSha256()), $secretKey);
+        return $verify;
     }
 
     /**

@@ -11,15 +11,9 @@
 
 namespace structureit\craftcognitoauth\services;
 
-use Craft;
+use CoderCat\JWKToPEM\JWKConverter;
 use craft\base\Component;
-use craft\elements\User;
-use craft\helpers\StringHelper;
-use craft\helpers\ArrayHelper;
 use structureit\craftcognitoauth\CraftCognitoAuth;
-use Lcobucci\JWT\Parser;
-use Lcobucci\JWT\Signer\Hmac\Sha256;
-use Lcobucci\JWT\Token;
 
 /**
  * @author    Mike Pierce
@@ -55,11 +49,12 @@ class CognitoJWK extends Component
     }
 
     /**
-     * Picks the correct JWK (Json Web Key) for the provided KeyID. Returns false on no key found
+     * Picks the correct JWK (Json Web Key) for the provided KeyID.
+     * Returns `array[string]` on correct Key found, and `false` on no key found
      *
      * @param array[array[string]] $jwks
      * @param string $kid
-     * @return array[string]|false
+     * @return array|false
      */
     public function pickJWK(array $jwks, string $kid)
     {
@@ -70,4 +65,16 @@ class CognitoJWK extends Component
         return false;
     }
 
+    /**
+     * Converts a provided JWK array to a signing key string (PEM certificate)
+     *
+     * @param array[string] $jwk
+     * @return string
+     */
+    public function JWKtoKey(array $jwk)
+    {
+        $jwkConverter = new JWKConverter();
+        $PEM = $jwkConverter->toPEM($jwk);
+        return $PEM;
+    }
 }
