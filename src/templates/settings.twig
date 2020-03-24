@@ -92,6 +92,6 @@
 {{ forms.textField({
     label: 'Redirect Target',
     instructions: 'Add the below link as allowed target in your user pool settings:',
-    value: '$DEFAULT_SITE_URL/cognitoauth',
-    disabled: true
+    value: cpUrl('cognitologin'),
+    readonly: true
 }) }}

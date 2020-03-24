@@ -64,6 +64,7 @@ class CraftCognitoAuth extends Plugin
             UrlManager::EVENT_REGISTER_CP_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
                 $event->rules['cognitologin']    = 'craft-cognito-auth/j-w-t/cognito-login';
+                $event->rules['logout-redirect'] = 'craft-cognito-auth/j-w-t/logout-redirect';
             }
         );
 

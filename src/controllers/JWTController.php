@@ -34,6 +34,7 @@ class JWTController extends Controller
      */
     protected $allowAnonymous = [
         'cognito-login',
+        'logout-redirect'
     ];
 
     // Public Methods
@@ -108,11 +109,9 @@ class JWTController extends Controller
     /**
      * @return mixed
      */
-    // TODO: Add an action to generate a JWT for a specific or the logged in user.
-    // public function actionGenerate()
-    // {
-    //     $result = 'Welcome to the JWTController actionGenerate() method';
-
-    //     return $result;
-    // }
+    public function actionLogoutRedirect()
+    {
+        \Craft::$app->getUser()->logout(false);
+        $this->redirect($_SERVER['HTTP_REFERER']);
+    }
 }
