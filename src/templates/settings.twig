@@ -64,6 +64,14 @@
     value: settings.customizeLoginLinkText
 }) }}
 
+{{ forms.autosuggestField({
+    label: 'Redirect URL',
+    instructions: 'URL to redirect to after user has logged in successfully. Defaults to the current site\'s base URL',
+    name: 'redirectURL',
+    suggestEnvVars: true,
+    value: settings.redirectURL
+}) }}
+
 <br />
 <h1>AWS Settings</h1>
 

@@ -62,6 +62,7 @@ class CraftCognitoAuth extends Plugin
         parent::init();
         self::$plugin = $this;
 
+        // Register controller methods
         Event::on(
             UrlManager::class,
             UrlManager::EVENT_REGISTER_CP_URL_RULES,

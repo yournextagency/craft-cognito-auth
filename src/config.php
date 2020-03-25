@@ -41,6 +41,9 @@ return [
     // The text that the login button should show on the Control Panel\'s login screen. Default: `Login with Cognito`
     "customizeLoginLinkText" => '',
 
+    // URL to redirect to after user has logged in successfully. Defaults to the current site's base URL
+    "redirectURL" => '',
+
     // The AWS Region where the User Pool is hosted
     "userPoolRegion" => '',
 

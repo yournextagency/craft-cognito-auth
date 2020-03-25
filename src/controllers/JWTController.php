@@ -62,12 +62,15 @@ class JWTController extends Controller
                     $user = CraftCognitoAuth::$plugin->jWT->createUserByJWT($token);
                 }
 
-
                 if (isset($user->id) && $user->id)
                 {   // Attempt to login as the user we have found or created
                     Craft::$app->user->loginByUserId($user->id);
-                    // redirect back to the homepage
-                    return $this->redirect(UrlHelper::baseUrl());
+
+                    // redirect to the configured URL or the baseUrl
+                    $redirectURL = Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->redirectURL);
+                    if (!isset($redirectURL) || !$redirectURL || $redirectURL === '')
+                        $redirectURL = UrlHelper::baseUrl();
+                    return $this->redirect($redirectURL);
                 }
                 else
                 {   // no user ID, something went wrong...
