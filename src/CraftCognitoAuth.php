@@ -13,10 +13,12 @@ namespace structureit\craftcognitoauth;
 
 use structureit\craftcognitoauth\services\JWT as JWTService;
 use structureit\craftcognitoauth\models\Settings;
+use structureit\craftcognitoauth\web\assets\login\LoginAsset;
 
 use Craft;
 use craft\base\Plugin;
 use craft\events\RegisterUrlRulesEvent;
+use craft\services\Plugins;
 use craft\web\UrlManager;
 use yii\base\Event;
 
@@ -65,6 +67,29 @@ class CraftCognitoAuth extends Plugin
             function (RegisterUrlRulesEvent $event) {
                 $event->rules['cognitologin']    = 'craft-cognito-auth/j-w-t/cognito-login';
                 $event->rules['logout-redirect'] = 'craft-cognito-auth/j-w-t/logout-redirect';
+            }
+        );
+
+        // Add login with cognito link to login screen
+        Event::on(
+            Plugins::class,
+            Plugins::EVENT_AFTER_LOAD_PLUGINS,
+            function() {
+                if (
+                    !Craft::$app->getRequest()->getIsConsoleRequest()
+                    && $this->getSettings()->addLoginLink
+                    && Craft::$app->getRequest()->getIsCpRequest()
+                    && Craft::$app->getRequest()->getSegment(1) === 'login'
+                ) {
+                    $jsCognitoProvider = [
+                        'url' => '',
+                        'text' => 'Login with Cognito'
+                    ];
+                    $error = Craft::$app->getSession()->getFlash('error');
+
+                    Craft::$app->getView()->registerAssetBundle(LoginAsset::class);
+                    Craft::$app->getView()->registerJs('var cognitoLoginForm = new Craft.CognitoLoginForm(' . json_encode($jsCognitoProvider) . ', ' . json_encode($error) . ');');
+                }
             }
         );
 
