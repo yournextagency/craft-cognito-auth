@@ -35,14 +35,17 @@ return [
     // Choose a user group that users will be added to when created from Cognito
     "newUserGroup" => 0,
 
-    // Enable CP Login Link - Toggles the visibility of the Login with Cognito link on the Control Panel's login screen
+    // Enable CP Login Link - Toggles the visibility of the Login with Cognito button on the Control Panel's login screen
     "addLoginLink" => false,
 
-    // The text that the login link should show on the Control Panel's login screen
+    // The text that the login button should show on the Control Panel\'s login screen. Default: `Login with Cognito`
     "customizeLoginLinkText" => '',
 
     // The AWS Region where the User Pool is hosted
     "userPoolRegion" => '',
+
+    // App Domain - Used to generate the login link for the Login with Cognito button
+    "userPoolAppDomain" => '',
 
     // App Client ID - Used to generate a login link and to verify the JWK was created for the correct pool
     "userPoolAppID" => '',

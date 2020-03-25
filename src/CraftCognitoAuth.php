@@ -82,8 +82,12 @@ class CraftCognitoAuth extends Plugin
                     && Craft::$app->getRequest()->getIsCpRequest()
                     && Craft::$app->getRequest()->getSegment(1) === 'login'
                 ) {
+                    // https://<userPoolAppDomain>.auth.<userPoolRegion>.amazoncognito.com/login
+                    //  ?response_type=token&amp;client_id=<userPoolAppID>&amp;redirect_uri=<urlencode(<callbackurl>)>
                     $redirectUrl =
-                        'https://auth.'
+                        'https://'
+                        . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolAppDomain)
+                        . '.auth.'
                         . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolRegion)
                         . '.amazoncognito.com/login?response_type=token&amp;client_id='
                         . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolAppID)

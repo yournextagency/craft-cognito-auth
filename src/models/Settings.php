@@ -36,6 +36,8 @@ class Settings extends Model
     /** @var string */
     public $userPoolRegion = '';
     /** @var string */
+    public $userPoolAppDomain = '';
+    /** @var string */
     public $userPoolAppID = '';
     /** @var string */
     public $userPoolID = '';
@@ -55,6 +57,7 @@ class Settings extends Model
             ['addLoginLink', 'boolean'],
             ['customizeLoginLinkText', 'string'],
             ['userPoolRegion', 'string'],
+            ['userPoolAppDomain', 'string'],
             ['userPoolAppID', 'string'],
             ['userPoolID', 'string']
         ];

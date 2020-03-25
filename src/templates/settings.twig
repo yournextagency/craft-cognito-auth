@@ -48,16 +48,17 @@
 
 
 {{ forms.lightswitchField({
-    label: 'Enable CP Login Link',
-    instructions: 'Toggles the visibility of the Login with Cognito link on the Control Panel\'s login screen',
+    label: 'Enable CP Login Button',
+    instructions: 'Toggles the visibility of the Login with Cognito button on the Control Panel\'s login screen',
     name: 'addLoginLink',
     on: settings.addLoginLink
 }) }}
 
 
 {{ forms.autosuggestField({
-    label: 'Customize Login Link text',
-    instructions: 'The text that the login link should show on the Control Panel\'s login screen',
+    label: 'Customize Login Button text',
+    instructions: 'The text that the login button should show on the Control Panel\'s login screen.
+<b>Default</b>: <code>Login with Cognito</code>',
     name: 'customizeLoginLinkText',
     suggestEnvVars: true,
     value: settings.customizeLoginLinkText
@@ -73,6 +74,14 @@
     suggestEnvVars: true,
     value: settings.userPoolRegion,
     warning: 'Required'
+}) }}
+
+{{ forms.autosuggestfield({
+    label: 'App Domain',
+    instructions: 'Used to generate the login link for the Login with Cognito button',
+    name: 'userPoolAppDomain',
+    suggestEnvVars: true,
+    value: settings.userPoolAppDomain
 }) }}
 
 {{ forms.autosuggestField({
