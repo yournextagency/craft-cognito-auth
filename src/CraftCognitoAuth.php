@@ -18,6 +18,7 @@ use structureit\craftcognitoauth\web\assets\login\LoginAsset;
 use Craft;
 use craft\base\Plugin;
 use craft\events\RegisterUrlRulesEvent;
+use craft\helpers\UrlHelper;
 use craft\services\Plugins;
 use craft\web\UrlManager;
 use yii\base\Event;
@@ -81,9 +82,21 @@ class CraftCognitoAuth extends Plugin
                     && Craft::$app->getRequest()->getIsCpRequest()
                     && Craft::$app->getRequest()->getSegment(1) === 'login'
                 ) {
+                    $redirectUrl =
+                        'https://auth.'
+                        . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolRegion)
+                        . '.amazoncognito.com/login?response_type=token&amp;client_id='
+                        . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolAppID)
+                        . '&amp;redirect_uri='
+                        . urlencode(UrlHelper::cpUrl('cognitologin'));
+
+                    $buttonText = Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->customizeLoginLinkText);
+                    if (!isset($buttonText) || !$buttonText || $buttonText === '')
+                        $buttonText = 'Login with Cognito';
+
                     $jsCognitoProvider = [
-                        'url' => '',
-                        'text' => 'Login with Cognito'
+                        'url' => $redirectUrl,
+                        'text' => $buttonText
                     ];
                     $error = Craft::$app->getSession()->getFlash('error');
 
