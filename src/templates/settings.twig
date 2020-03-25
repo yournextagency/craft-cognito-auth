@@ -59,6 +59,7 @@
     label: 'Customize Login Link text',
     instructions: 'The text that the login link should show on the Control Panel\'s login screen',
     name: 'customizeLoginLinkText',
+    suggestEnvVars: true,
     value: settings.customizeLoginLinkText
 }) }}
 
@@ -69,6 +70,7 @@
     label: 'User Pool Region',
     instructions: 'The AWS Region where the User Pool is hosted',
     name: 'userPoolRegion',
+    suggestEnvVars: true,
     value: settings.userPoolRegion,
     warning: 'Required'
 }) }}
@@ -77,6 +79,7 @@
     label: 'App Client ID',
     instructions: 'Used to generate a login link and to verify the JWK was created for the correct pool',
     name: 'userPoolAppID',
+    suggestEnvVars: true,
     value: settings.userPoolAppID,
     warning: 'Required'
 }) }}
@@ -85,6 +88,7 @@
     label: 'User Pool ID',
     instructions: 'Required to get the key Cognito used to sign the JWK',
     name: 'userPoolID',
+    suggestEnvVars: true,
     value: settings.userPoolID,
     warning: 'Required'
 }) }}

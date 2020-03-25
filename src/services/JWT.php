@@ -92,13 +92,13 @@ class JWT extends Component
         // check correct claims
         if (!$token->hasClaim('email') || !$token->getClaim('email_verified'))
             return false;
-        $expectedAudience = CraftCognitoAuth::getInstance()->getSettings()->userPoolAppID;
+        $expectedAudience = Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolAppID);
         if (!$token->hasClaim('aud') || $token->getClaim('aud') !== $expectedAudience)
             return false;
         if (!$token->hasClaim('token_use') || $token->getClaim('token_use') !== 'id')
             return false;
-        $expectedIssuer = 'https://cognito-idp.' . CraftCognitoAuth::getInstance()->getSettings()->userPoolRegion;
-        $expectedIssuer .= '.amazonaws.com/' . CraftCognitoAuth::getInstance()->getSettings()->userPoolID;
+        $expectedIssuer = 'https://cognito-idp.' . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolRegion);
+        $expectedIssuer .= '.amazonaws.com/' . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolID);
         if (!$token->hasClaim('iss') || $token->getClaim('iss') !== $expectedIssuer)
             return false;
 

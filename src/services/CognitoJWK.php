@@ -12,6 +12,7 @@
 namespace structureit\craftcognitoauth\services;
 
 use CoderCat\JWKToPEM\JWKConverter;
+use Craft;
 use craft\base\Component;
 use structureit\craftcognitoauth\CraftCognitoAuth;
 
@@ -34,8 +35,8 @@ class CognitoJWK extends Component
     public function getCognitoJWKS()
     {
         // get JSON string
-        $wellKnownPath = 'https://cognito-idp.' . CraftCognitoAuth::getInstance()->getSettings()->userPoolRegion;
-        $wellKnownPath .= '.amazonaws.com/' . CraftCognitoAuth::getInstance()->getSettings()->userPoolID . '/.well-known/jwks.json';
+        $wellKnownPath = 'https://cognito-idp.' . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolRegion);
+        $wellKnownPath .= '.amazonaws.com/' . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolID) . '/.well-known/jwks.json';
         $JWKSstringArray = file_get_contents($wellKnownPath);
         if ($JWKSstringArray === false)
             return false;
