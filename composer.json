@@ -2,7 +2,7 @@
   "name": "structureit/craft-cognito-auth",
   "description": "Enable authentication to Craft using Amazon Cognito with JWTs",
   "type": "craft-plugin",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "keywords": [
     "craft",
     "cms",

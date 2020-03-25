@@ -94,7 +94,7 @@
 
 {{ forms.autosuggestField({
     label: 'App Client ID',
-    instructions: 'Used to generate a login link and to verify the JWK was created for the correct pool',
+    instructions: 'Used to generate the login link and to verify the JWT was created for the correct pool',
     name: 'userPoolAppID',
     suggestEnvVars: true,
     value: settings.userPoolAppID,
@@ -103,7 +103,7 @@
 
 {{ forms.autosuggestField({
     label: 'User Pool ID',
-    instructions: 'Required to get the key Cognito used to sign the JWK',
+    instructions: 'Required to get the key Cognito used to sign the JWT',
     name: 'userPoolID',
     suggestEnvVars: true,
     value: settings.userPoolID,

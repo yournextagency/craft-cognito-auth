@@ -50,9 +50,9 @@ return [
     // App Domain - Used to generate the login link for the Login with Cognito button
     "userPoolAppDomain" => '',
 
-    // App Client ID - Used to generate a login link and to verify the JWK was created for the correct pool
+    // App Client ID - Used to generate the login link and to verify the JWT was created for the correct pool
     "userPoolAppID" => '',
 
-    // Required to get the key Cognito used to sign the JWK
+    // Required to get the key Cognito used to sign the JWT
     "userPoolID" => '',
 ];
