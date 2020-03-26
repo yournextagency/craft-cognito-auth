@@ -8,7 +8,13 @@
     "cms",
     "craftcms",
     "craft-plugin",
-    "craft jwt"
+    "craft jwt",
+    "cognito",
+    "aws cognito",
+    "amazon cognito",
+    "aws",
+    "amazon",
+    "user pool"
   ],
   "support": {
     "docs": "https://github.com/Walkman100/craft-cognito-auth",
