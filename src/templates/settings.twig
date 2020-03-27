@@ -23,7 +23,6 @@
     on: settings.autoCreateUser
 }) }}
 
-
 {{ forms.lightswitchField({
     label: 'Auto create users when Public Registration is disabled',
     instructions: 'Allow creating users even when Public Registration is disabled in <a href="' ~ cpUrl('settings/users/settings') ~ '">Craft\'s settings</a>',
@@ -31,12 +30,10 @@
     on: settings.autoCreateUserWhenPublicRegistrationDisabled
 }) }}
 
-
 {% set groups = [{ label: "None", value: '' }] %}
 {% for group in craft.app.userGroups.getAllGroups() %}
     {% set groups = groups|merge([{ label: group.name, value: group.id }]) %}
 {% endfor %}
-
 {{ forms.selectField({
     label: 'Default User Group',
     instructions: 'Choose a user group that users will be added to when created from Cognito',
@@ -46,14 +43,12 @@
     errors: settings.getErrors('newUserGroup')
 }) }}
 
-
 {{ forms.lightswitchField({
     label: 'Enable CP Login Button',
     instructions: 'Toggles the visibility of the Login with Cognito button on the Control Panel\'s login screen',
     name: 'addLoginLink',
     on: settings.addLoginLink
 }) }}
-
 
 {{ forms.autosuggestField({
     label: 'Customize Login Button text',
@@ -62,6 +57,14 @@
     name: 'customizeLoginLinkText',
     suggestEnvVars: true,
     value: settings.customizeLoginLinkText
+}) }}
+
+{{ forms.autosuggestField({
+    label: 'Customize Login Button URL',
+    instructions: 'The URL that the login button navigates to. Leave blank to generate a URL to the Hosted UI - fill in App Domain below.',
+    name: 'customizeLoginLinkURL',
+    suggestEnvVars: true,
+    value: settings.customizeLoginLinkURL
 }) }}
 
 {{ forms.autosuggestField({
@@ -74,7 +77,6 @@
 
 <br />
 <h1>AWS Settings</h1>
-
 {{ forms.autosuggestField({
     label: 'User Pool Region',
     instructions: 'The AWS Region where the User Pool is hosted',
@@ -83,7 +85,6 @@
     value: settings.userPoolRegion,
     warning: 'Required'
 }) }}
-
 {{ forms.autosuggestfield({
     label: 'App Domain',
     instructions: 'Used to generate the login link for the Login with Cognito button',
@@ -91,7 +92,6 @@
     suggestEnvVars: true,
     value: settings.userPoolAppDomain
 }) }}
-
 {{ forms.autosuggestField({
     label: 'App Client ID',
     instructions: 'Used to generate the login link and to verify the JWT was created for the correct pool',
@@ -100,7 +100,6 @@
     value: settings.userPoolAppID,
     warning: 'Required'
 }) }}
-
 {{ forms.autosuggestField({
     label: 'User Pool ID',
     instructions: 'Required to get the key Cognito used to sign the JWT',
@@ -109,7 +108,6 @@
     value: settings.userPoolID,
     warning: 'Required'
 }) }}
-
 {{ forms.textField({
     label: 'Redirect Target',
     instructions: 'Add the below link as allowed Callback URL in your user pool settings - App integration / App client settings:',

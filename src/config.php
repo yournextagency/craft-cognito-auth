@@ -41,6 +41,9 @@ return [
     // The text that the login button should show on the Control Panel\'s login screen. Default: `Login with Cognito`
     "customizeLoginLinkText" => '',
 
+    // The URL that the login button navigates to. Leave blank to generate a URL to the Hosted UI - fill in userPoolAppDomain below
+    "customizeLoginLinkURL" => '',
+
     // URL to redirect to after user has logged in successfully. Defaults to the current site's base URL
     "redirectURL" => '',
 

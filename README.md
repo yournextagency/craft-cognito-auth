@@ -41,6 +41,7 @@ Once installed, navigate to the settings page of the plugin and enter required s
 | `Default user group`                                     | Optional. Set to a group to add newly-created users to.                                                |
 | `Enable CP login button`                                 | Optional. Enable to add a button to the CP login screen to login using Cognito.                        |
 | `Customize login button text`                            | Optional. Used to override the default text on the Login with Cognito button.                          |
+| `Customize login button URL`                             | Optional. Used to override the generated URL to the Hosted UI used for the login button.               |
 | `Redirect URL`                                           | Optional. Used to redirect the user after they have logged in, default is the current site's base url. |
 | **AWS Settings**                                         |
 | `User Pool Region`                                       | Required. The AWS Region where the User Pool is hosted.                                                |

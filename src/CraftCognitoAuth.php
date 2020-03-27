@@ -77,37 +77,7 @@ class CraftCognitoAuth extends Plugin
             Plugins::class,
             Plugins::EVENT_AFTER_LOAD_PLUGINS,
             function() {
-                if (
-                    !Craft::$app->getRequest()->getIsConsoleRequest()
-                    && $this->getSettings()->addLoginLink
-                    && Craft::$app->getRequest()->getIsCpRequest()
-                    && Craft::$app->getRequest()->getSegment(1) === 'login'
-                ) {
-                    // https://<userPoolAppDomain>.auth.<userPoolRegion>.amazoncognito.com/login
-                    //  ?response_type=token&amp;client_id=<userPoolAppID>&amp;redirect_uri=<urlencode(<callbackurl>)>
-                    $redirectUrl =
-                        'https://'
-                        . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolAppDomain)
-                        . '.auth.'
-                        . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolRegion)
-                        . '.amazoncognito.com/login?response_type=token&amp;client_id='
-                        . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolAppID)
-                        . '&amp;redirect_uri='
-                        . urlencode(UrlHelper::cpUrl('cognitologin'));
-
-                    $buttonText = Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->customizeLoginLinkText);
-                    if (!isset($buttonText) || !$buttonText || $buttonText === '')
-                        $buttonText = 'Login with Cognito';
-
-                    $jsCognitoProvider = [
-                        'url' => $redirectUrl,
-                        'text' => $buttonText
-                    ];
-                    $error = Craft::$app->getSession()->getFlash('error');
-
-                    Craft::$app->getView()->registerAssetBundle(LoginAsset::class);
-                    Craft::$app->getView()->registerJs('var cognitoLoginForm = new Craft.CognitoLoginForm(' . json_encode($jsCognitoProvider) . ', ' . json_encode($error) . ');');
-                }
+                $this->addLoginLink();
             }
         );
 
@@ -123,6 +93,44 @@ class CraftCognitoAuth extends Plugin
 
     // Protected Methods
     // =========================================================================
+
+    protected function addLoginLink() {
+        if (
+            !Craft::$app->getRequest()->getIsConsoleRequest()
+            && $this->getSettings()->addLoginLink
+            && Craft::$app->getRequest()->getIsCpRequest()
+            && Craft::$app->getRequest()->getSegment(1) === 'login'
+        ) {
+            $redirectUrl = Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->customizeLoginLinkURL);
+            if (!isset($redirectUrl) || !$redirectUrl || $redirectUrl === '')
+            {
+                // https://<userPoolAppDomain>.auth.<userPoolRegion>.amazoncognito.com/login
+                //  ?response_type=token&amp;client_id=<userPoolAppID>&amp;redirect_uri=<urlencode(<callbackurl>)>
+                $redirectUrl =
+                    'https://'
+                    . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolAppDomain)
+                    . '.auth.'
+                    . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolRegion)
+                    . '.amazoncognito.com/login?response_type=token&amp;client_id='
+                    . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolAppID)
+                    . '&amp;redirect_uri='
+                    . urlencode(UrlHelper::cpUrl('cognitologin'));
+            }
+
+            $buttonText = Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->customizeLoginLinkText);
+            if (!isset($buttonText) || !$buttonText || $buttonText === '')
+                $buttonText = 'Login with Cognito';
+
+            $jsCognitoProvider = [
+                'url' => $redirectUrl,
+                'text' => $buttonText
+            ];
+            $error = Craft::$app->getSession()->getFlash('error');
+
+            Craft::$app->getView()->registerAssetBundle(LoginAsset::class);
+            Craft::$app->getView()->registerJs('var cognitoLoginForm = new Craft.CognitoLoginForm(' . json_encode($jsCognitoProvider) . ', ' . json_encode($error) . ');');
+        }
+    }
 
     /**
      * @inheritdoc

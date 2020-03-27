@@ -34,6 +34,8 @@ class Settings extends Model
     /** @var string */
     public $customizeLoginLinkText = '';
     /** @var string */
+    public $customizeLoginLinkURL = '';
+    /** @var string */
     public $redirectURL = '';
     /** @var string */
     public $userPoolRegion = '';
@@ -58,6 +60,7 @@ class Settings extends Model
             ['newUserGroup', 'integer'],
             ['addLoginLink', 'boolean'],
             ['customizeLoginLinkText', 'string'],
+            ['customizeLoginLinkURL', 'string'],
             ['redirectURL', 'string'],
             ['userPoolRegion', 'string'],
             ['userPoolAppDomain', 'string'],
