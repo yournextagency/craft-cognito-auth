@@ -94,7 +94,8 @@ class CraftCognitoAuth extends Plugin
     // Protected Methods
     // =========================================================================
 
-    protected function addLoginLink() {
+    protected function addLoginLink()
+    {
         if (
             !Craft::$app->getRequest()->getIsConsoleRequest()
             && $this->getSettings()->addLoginLink
@@ -106,12 +107,18 @@ class CraftCognitoAuth extends Plugin
             {
                 // https://<userPoolAppDomain>.auth.<userPoolRegion>.amazoncognito.com/login
                 //  ?response_type=token&amp;client_id=<userPoolAppID>&amp;redirect_uri=<urlencode(<callbackurl>)>
-                $redirectUrl =
-                    'https://'
-                    . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolAppDomain)
-                    . '.auth.'
-                    . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolRegion)
-                    . '.amazoncognito.com/login?response_type=token&amp;client_id='
+                $redirectUrl = Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->customDomain);
+                if (!isset($redirectUrl) || !$redirectUrl || $redirectUrl === '')
+                {
+                    $redirectUrl =
+                        'https://'
+                        . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolAppDomain)
+                        . '.auth.'
+                        . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolRegion)
+                        . '.amazoncognito.com';
+                }
+                $redirectUrl .=
+                    '/login?response_type=token&amp;client_id='
                     . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolAppID)
                     . '&amp;redirect_uri='
                     . urlencode(UrlHelper::cpUrl('cognitologin'));

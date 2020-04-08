@@ -44,6 +44,9 @@ return [
     // The URL that the login button navigates to. Leave blank to generate a URL to the Hosted UI - fill in userPoolAppDomain below
     "customizeLoginLinkURL" => '',
 
+    // Custom Domain to use for the Hosted UI URL. Leave blank to generate Cognito's Domain.
+    "customDomain" => '',
+
     // URL to redirect to after user has logged in successfully. Defaults to the current site's base URL
     "redirectURL" => '',
 

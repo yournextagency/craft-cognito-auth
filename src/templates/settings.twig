@@ -68,6 +68,14 @@
 }) }}
 
 {{ forms.autosuggestField({
+    label: 'Custom Domain',
+    instructions: 'Custom Domain to use for the Hosted UI URL. Leave blank to generate Cognito\'s Domain.',
+    name: 'customDomain',
+    suggestEnvVars: true,
+    value: settings.customDomain
+}) }}
+
+{{ forms.autosuggestField({
     label: 'Redirect URL',
     instructions: 'URL to redirect to after user has logged in successfully. Defaults to the current site\'s base URL',
     name: 'redirectURL',
