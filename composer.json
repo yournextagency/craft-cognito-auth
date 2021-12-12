@@ -36,8 +36,8 @@
     }
   ],
   "require": {
-    "craftcms/cms": "^3.3",
-    "lcobucci/jwt": "^3.3",
+    "craftcms/cms": "^3.7",
+    "lcobucci/jwt": "^4.0",
     "codercat/jwk-to-pem": "^0.0.3"
   },
   "autoload": {

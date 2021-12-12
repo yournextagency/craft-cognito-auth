@@ -17,9 +17,12 @@ use craft\elements\User;
 use craft\helpers\StringHelper;
 use craft\helpers\ArrayHelper;
 use structureit\craftcognitoauth\CraftCognitoAuth;
-use Lcobucci\JWT\Parser;
-use Lcobucci\JWT\Signer\Rsa\Sha256 as RsaSha256;
+//use Lcobucci\JWT\Parser;
+//use Lcobucci\JWT\Signer\Rsa\Sha256 as RsaSha256;
 use Lcobucci\JWT\Token;
+use Lcobucci\JWT\Configuration;
+use Lcobucci\JWT\Signer\Key\InMemory;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
 
 /**
  * @author    Mike Pierce
@@ -30,6 +33,17 @@ class JWT extends Component
 {
     // Public Methods
     // =========================================================================
+    private Configuration $config;
+    /**
+     * @var Configuration|mixed
+     */
+    private $validationConfig;
+
+    public function init()
+    {
+        parent::init();
+        $this->config = Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText('test'));
+    }
 
     /**
      * Gets the access token in the query parameters. Returns false if no token is found.
@@ -69,7 +83,8 @@ class JWT extends Component
     public function parseJWT(string $accessToken)
     {
         if (count(explode('.', $accessToken)) === 3) {
-            $token = (new Parser())->parse((string) $accessToken);
+            //$token = (new Parser())->parse((string) $accessToken);
+            $token =  $token = $this->config->parser()->parse($accessToken);
 
             return $token;
         }
@@ -85,21 +100,21 @@ class JWT extends Component
      */
     public function verifyJWT(Token $token)
     {
-        // do nothing if token has expired
-        if ($token->isExpired())
-            return false;
+//        // do nothing if token has expired
+//        if ($token->isExpired())
+//            return false;
 
         // check correct claims
-        if (!$token->hasClaim('email') || !$token->getClaim('email_verified'))
+        if (!$token->claims()->has('email') || !$token->claims()->get('email_verified'))
             return false;
         $expectedAudience = Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolAppID);
-        if (!$token->hasClaim('aud') || $token->getClaim('aud') !== $expectedAudience)
+        if (!$token->claims()->has('aud') || $token->claims()->get('aud') !== $expectedAudience)
             return false;
-        if (!$token->hasClaim('token_use') || $token->getClaim('token_use') !== 'id')
+        if (!$token->claims()->has('token_use') || $token->claims()->get('token_use') !== 'id')
             return false;
         $expectedIssuer = 'https://cognito-idp.' . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolRegion);
         $expectedIssuer .= '.amazonaws.com/' . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolID);
-        if (!$token->hasClaim('iss') || $token->getClaim('iss') !== $expectedIssuer)
+        if (!$token->claims()->has('iss') || $token->claims()->get('iss') !== $expectedIssuer)
             return false;
 
         // get JWKSet from Cognito
@@ -107,15 +122,16 @@ class JWT extends Component
         if (!$JWKS)
             return false;
         // Choose the correct one that matches the token's KeyID
-        $JWK = CraftCognitoAuth::$plugin->CognitoJWK->pickJWK($JWKS, $token->getHeader('kid', ''));
+        $JWK = CraftCognitoAuth::$plugin->CognitoJWK->pickJWK($JWKS, $token->headers()->get('kid', ''));
         if (!$JWK)
             return false;
         // Convert to PEM Certificate string
         $secretKey = CraftCognitoAuth::$plugin->CognitoJWK->JWKtoKey($JWK);
+        $this->validationConfig = Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText($secretKey));
 
         // Attempt to verify the token
-        $verify = $token->verify((new RsaSha256()), $secretKey);
-        return $verify;
+        //$verify = $token->verify((new RsaSha256()), $secretKey);
+        return $this->validationConfig->validator()->validate($token, ...$this->config->validationConstraints());
     }
 
     /**
@@ -128,8 +144,8 @@ class JWT extends Component
     {
         if ($this->verifyJWT($token)) {
             // Derive the username & email from the subject in the token
-            $email = $token->getClaim('email', '');
-            $userName = $token->getClaim('cognito:username', '');
+            $email = $token->claims()->get('email', '');
+            $userName = $token->claims()->get('cognito:username', '');
 
             // Look for the user with email
             $user = Craft::$app->users->getUserByUsernameOrEmail($email);
@@ -174,18 +190,18 @@ class JWT extends Component
         $user = new User();
 
         // Get email - verifyJWT() makes sure this has an email claim
-        $email = $token->getClaim('email');
+        $email = $token->claims()->get('email');
         // just in case:
         if (!$email)
             return false;
 
         // Set username and email
         $user->email = $email;
-        $user->username = $token->getClaim('cognito:username', $email);
+        $user->username = $token->claims()->get('cognito:username', $email);
 
         // These are optional, so pass empty string as the default
-        $user->firstName = $token->getClaim('given_name', '');
-        $user->lastName = $token->getClaim('family_name', '');
+        $user->firstName = $token->claims()->get('given_name', '');
+        $user->lastName = $token->claims()->get('family_name', '');
 
         // Attempt to save the user
         $success = Craft::$app->getElements()->saveElement($user);
@@ -202,7 +218,7 @@ class JWT extends Component
             }
 
             // Look for a picture in the claim
-            $picture = $token->hasClaim('picture') ? $token->getClaim('picture') : false;
+            $picture = $token->claims()->has('picture') ? $token->claims()->get('picture') : false;
             if ($picture) {
                 // Create a guzzel client
                 $guzzle = Craft::createGuzzleClient();
