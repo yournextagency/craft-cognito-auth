@@ -17,6 +17,7 @@ use craft\elements\User;
 use craft\helpers\StringHelper;
 use craft\helpers\ArrayHelper;
 use structureit\craftcognitoauth\CraftCognitoAuth;
+
 //use Lcobucci\JWT\Parser;
 //use Lcobucci\JWT\Signer\Rsa\Sha256 as RsaSha256;
 use Lcobucci\JWT\Token;
@@ -51,10 +52,11 @@ class JWT extends Component
      */
     public function getJWTFromRequest()
     {
-        if (isset(Craft::$app->request->queryParams['jwt']))
+        if (isset(Craft::$app->request->queryParams['jwt'])) {
             return Craft::$app->request->queryParams['jwt'];
-        else
+        } else {
             return false;
+        }
     }
 
     /**
@@ -84,7 +86,7 @@ class JWT extends Component
     {
         if (count(explode('.', $accessToken)) === 3) {
             //$token = (new Parser())->parse((string) $accessToken);
-            $token =  $token = $this->config->parser()->parse($accessToken);
+            $token = $token = $this->config->parser()->parse($accessToken);
 
             return $token;
         }
@@ -105,26 +107,32 @@ class JWT extends Component
 //            return false;
 
         // check correct claims
-        if (!$token->claims()->has('email') || !$token->claims()->get('email_verified'))
+        if (!$token->claims()->has('email') || !$token->claims()->get('email_verified')) {
             return false;
+        }
         $expectedAudience = Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolAppID);
-        if (!$token->claims()->has('aud') || $token->claims()->get('aud') !== $expectedAudience)
+        if (!$token->claims()->has('aud') || $token->claims()->get('aud') !== $expectedAudience) {
             return false;
-        if (!$token->claims()->has('token_use') || $token->claims()->get('token_use') !== 'id')
+        }
+        if (!$token->claims()->has('token_use') || $token->claims()->get('token_use') !== 'id') {
             return false;
+        }
         $expectedIssuer = 'https://cognito-idp.' . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolRegion);
         $expectedIssuer .= '.amazonaws.com/' . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolID);
-        if (!$token->claims()->has('iss') || $token->claims()->get('iss') !== $expectedIssuer)
+        if (!$token->claims()->has('iss') || $token->claims()->get('iss') !== $expectedIssuer) {
             return false;
+        }
 
         // get JWKSet from Cognito
         $JWKS = CraftCognitoAuth::$plugin->CognitoJWK->getCognitoJWKS();
-        if (!$JWKS)
+        if (!$JWKS) {
             return false;
+        }
         // Choose the correct one that matches the token's KeyID
         $JWK = CraftCognitoAuth::$plugin->CognitoJWK->pickJWK($JWKS, $token->headers()->get('kid', ''));
-        if (!$JWK)
+        if (!$JWK) {
             return false;
+        }
         // Convert to PEM Certificate string
         $secretKey = CraftCognitoAuth::$plugin->CognitoJWK->JWKtoKey($JWK);
         $this->validationConfig = Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText($secretKey));
@@ -150,11 +158,13 @@ class JWT extends Component
             // Look for the user with email
             $user = Craft::$app->users->getUserByUsernameOrEmail($email);
             // If no user is found, look for the user by username
-            if (!$user)
+            if (!$user) {
                 $user = Craft::$app->users->getUserByUsernameOrEmail($userName);
+            }
 
-            if ($user)
+            if ($user) {
                 return $user;
+            }
         }
 
         return false;
@@ -192,8 +202,9 @@ class JWT extends Component
         // Get email - verifyJWT() makes sure this has an email claim
         $email = $token->claims()->get('email');
         // just in case:
-        if (!$email)
+        if (!$email) {
             return false;
+        }
 
         // Set username and email
         $user->email = $email;

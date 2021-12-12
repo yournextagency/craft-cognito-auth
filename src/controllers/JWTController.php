@@ -43,51 +43,40 @@ class JWTController extends Controller
 
     public function actionCognitoLogin()
     {
-        if (($jwt = CraftCognitoAuth::$plugin->jWT->getJWTFromRequest()))
-        {
+        if (($jwt = CraftCognitoAuth::$plugin->jWT->getJWTFromRequest())) {
             // If the token passes verification
-            if (($token = CraftCognitoAuth::$plugin->jWT->parseAndVerifyJWT($jwt)))
-            {
+            if (($token = CraftCognitoAuth::$plugin->jWT->parseAndVerifyJWT($jwt))) {
                 // Look for the user
                 $user = CraftCognitoAuth::$plugin->jWT->getUserByJWT($token);
 
-                if (!$user && !CraftCognitoAuth::$plugin->jWT->shouldAutoCreateUser())
-                {   // If we don't have a user, and we're NOT allowed to create one
+                if (!$user && !CraftCognitoAuth::$plugin->jWT->shouldAutoCreateUser()) {   // If we don't have a user, and we're NOT allowed to create one
                     return $this->renderTemplate('error', [
-                            'message' => 'No Existing User Found! (And not allowed to create new users)'
-                        ], View::TEMPLATE_MODE_CP);
-                }
-                elseif (!$user)
-                {   // If we don't have a user, but we ARE allowed to create one
+                        'message' => 'No Existing User Found! (And not allowed to create new users)'
+                    ], View::TEMPLATE_MODE_CP);
+                } elseif (!$user) {   // If we don't have a user, but we ARE allowed to create one
                     $user = CraftCognitoAuth::$plugin->jWT->createUserByJWT($token);
                 }
 
-                if (isset($user->id) && $user->id)
-                {   // Attempt to login as the user we have found or created
+                if (isset($user->id) && $user->id) {   // Attempt to login as the user we have found or created
                     Craft::$app->user->loginByUserId($user->id);
 
                     // redirect to the configured URL or the baseUrl
                     $redirectURL = Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->redirectURL);
-                    if (!isset($redirectURL) || !$redirectURL || $redirectURL === '')
+                    if (!isset($redirectURL) || !$redirectURL || $redirectURL === '') {
                         $redirectURL = UrlHelper::baseUrl();
+                    }
                     return $this->redirect($redirectURL);
-                }
-                else
-                {   // no user ID, something went wrong...
+                } else {   // no user ID, something went wrong...
                     return $this->renderTemplate('error', [
-                            'message' => 'Unknown Error Getting/Creating User!'
-                        ], View::TEMPLATE_MODE_CP);
-                }
-            }
-            else
-            {   // parseToken or verifyToken failed
-                return $this->renderTemplate('error', [
-                        'message' => 'Invalid Token!'
+                        'message' => 'Unknown Error Getting/Creating User!'
                     ], View::TEMPLATE_MODE_CP);
+                }
+            } else {   // parseToken or verifyToken failed
+                return $this->renderTemplate('error', [
+                    'message' => 'Invalid Token!'
+                ], View::TEMPLATE_MODE_CP);
             }
-        }
-        else
-        {   // No jwt in QueryParams, try using javascript to extract from SearchParams
+        } else {   // No jwt in QueryParams, try using javascript to extract from SearchParams
             return '
 <!DOCTYPE html>
 <html lang="en">

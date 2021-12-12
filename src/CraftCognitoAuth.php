@@ -67,7 +67,7 @@ class CraftCognitoAuth extends Plugin
             UrlManager::class,
             UrlManager::EVENT_REGISTER_CP_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
-                $event->rules['cognitologin']    = 'craft-cognito-auth/j-w-t/cognito-login';
+                $event->rules['cognitologin'] = 'craft-cognito-auth/j-w-t/cognito-login';
                 $event->rules['logout-redirect'] = 'craft-cognito-auth/j-w-t/logout-redirect';
             }
         );
@@ -76,7 +76,7 @@ class CraftCognitoAuth extends Plugin
         Event::on(
             Plugins::class,
             Plugins::EVENT_AFTER_LOAD_PLUGINS,
-            function() {
+            function () {
                 $this->addLoginLink();
             }
         );
@@ -103,13 +103,11 @@ class CraftCognitoAuth extends Plugin
             && Craft::$app->getRequest()->getSegment(1) === 'login'
         ) {
             $redirectUrl = Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->customizeLoginLinkURL);
-            if (!isset($redirectUrl) || !$redirectUrl || $redirectUrl === '')
-            {
+            if (!isset($redirectUrl) || !$redirectUrl || $redirectUrl === '') {
                 // https://<userPoolAppDomain>.auth.<userPoolRegion>.amazoncognito.com/login
                 //  ?response_type=token&amp;client_id=<userPoolAppID>&amp;redirect_uri=<urlencode(<callbackurl>)>
                 $redirectUrl = Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->customDomain);
-                if (!isset($redirectUrl) || !$redirectUrl || $redirectUrl === '')
-                {
+                if (!isset($redirectUrl) || !$redirectUrl || $redirectUrl === '') {
                     $redirectUrl =
                         'https://'
                         . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolAppDomain)
@@ -125,8 +123,9 @@ class CraftCognitoAuth extends Plugin
             }
 
             $buttonText = Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->customizeLoginLinkText);
-            if (!isset($buttonText) || !$buttonText || $buttonText === '')
+            if (!isset($buttonText) || !$buttonText || $buttonText === '') {
                 $buttonText = 'Login with Cognito';
+            }
 
             $jsCognitoProvider = [
                 'url' => $redirectUrl,
