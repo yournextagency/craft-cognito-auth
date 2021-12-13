@@ -16,6 +16,10 @@ use craft\base\Component;
 use craft\elements\User;
 use craft\helpers\StringHelper;
 use craft\helpers\ArrayHelper;
+use Lcobucci\Clock\FrozenClock;
+use Lcobucci\JWT\Validation\Constraint\PermittedFor;
+use Lcobucci\JWT\Validation\Constraint\IssuedBy;
+use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use structureit\craftcognitoauth\CraftCognitoAuth;
 
 //use Lcobucci\JWT\Parser;
@@ -102,26 +106,18 @@ class JWT extends Component
      */
     public function verifyJWT(Token $token)
     {
-//        // do nothing if token has expired
-//        if ($token->isExpired())
-//            return false;
 
         // check correct claims
         if (!$token->claims()->has('email') || !$token->claims()->get('email_verified')) {
             return false;
         }
+
         $expectedAudience = Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolAppID);
-        if (!$token->claims()->has('aud') || $token->claims()->get('aud') !== $expectedAudience) {
-            return false;
-        }
         if (!$token->claims()->has('token_use') || $token->claims()->get('token_use') !== 'id') {
             return false;
         }
         $expectedIssuer = 'https://cognito-idp.' . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolRegion);
         $expectedIssuer .= '.amazonaws.com/' . Craft::parseEnv(CraftCognitoAuth::getInstance()->getSettings()->userPoolID);
-        if (!$token->claims()->has('iss') || $token->claims()->get('iss') !== $expectedIssuer) {
-            return false;
-        }
 
         // get JWKSet from Cognito
         $JWKS = CraftCognitoAuth::$plugin->CognitoJWK->getCognitoJWKS();
@@ -136,10 +132,14 @@ class JWT extends Component
         // Convert to PEM Certificate string
         $secretKey = CraftCognitoAuth::$plugin->CognitoJWK->JWKtoKey($JWK);
         $this->validationConfig = Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText($secretKey));
+        $this->validationConfig->setValidationConstraints(new PermittedFor($expectedAudience));
+        $this->validationConfig->setValidationConstraints(new IssuedBy($expectedIssuer));
 
+        $clock = (new FrozenClock(new \DateTimeImmutable()));
+        $this->validationConfig->setValidationConstraints(new LooseValidAt($clock));
         // Attempt to verify the token
         //$verify = $token->verify((new RsaSha256()), $secretKey);
-        return $this->validationConfig->validator()->validate($token, ...$this->config->validationConstraints());
+        return $this->validationConfig->validator()->validate($token, ...$this->validationConfig->validationConstraints());
     }
 
     /**
